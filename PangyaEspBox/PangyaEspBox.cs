@@ -24,7 +24,7 @@ namespace PangyaEspBox
 
         BackgroundWorker BGW = new BackgroundWorker();
 
-        const string PANGYA_VIEW_MATRIX_BASE_ADDRESS = "0x00F02496"; // view matrix 0x00F02494 || 0x00F02484
+        const string PANGYA_VIEW_MATRIX_BASE_ADDRESS = "0x00F02494"; // view matrix 0x00F02494 || 0x00F02484 
         const string PANGYA_BALL_BASE_ADDRESS = "0x00E47E30"; // ball 0x00E47E30
 
         Ball ball = new Ball();
@@ -94,11 +94,12 @@ namespace PangyaEspBox
             matrix.m32 = BitConverter.ToSingle(bytes, (9 * 4));
             matrix.m33 = BitConverter.ToSingle(bytes, (10 * 4));
             matrix.m34 = BitConverter.ToSingle(bytes, (11 * 4));
-
+ 
             matrix.m41 = BitConverter.ToSingle(bytes, (12 * 4));
             matrix.m42 = BitConverter.ToSingle(bytes, (13 * 4));
             matrix.m43 = BitConverter.ToSingle(bytes, (14 * 4));
             matrix.m44 = BitConverter.ToSingle(bytes, (15 * 4));
+            
 
             return matrix;
         }
@@ -107,6 +108,32 @@ namespace PangyaEspBox
         {
             Point twoDPoint = new Point();
 
+            float screenposx = (mtx.m11 * position.x) + (mtx.m12 * position.y) + (mtx.m13 * position.z) + mtx.m14;
+            float screenposy = (mtx.m21 * position.x) + (mtx.m22 * position.y) + (mtx.m23 * position.z) + mtx.m24;
+            float screenposz = (mtx.m31 * position.x) + (mtx.m32 * position.y) + (mtx.m33 * position.z) + mtx.m34;
+
+            if (screenposx > 0.001)
+            {
+                screenposz = 1.0f / screenposz;
+                screenposx *= screenposz;
+                screenposy *= screenposz;
+
+                float _x = width / 2;
+                float _y = height / 2;
+
+                screenposx += _x + ((float)0.5f * screenposx * width + 0.5f);
+                screenposy = _y - ((float)0.5f * screenposy * height + 0.5f);
+
+                twoDPoint.X = (int)screenposx;
+                twoDPoint.Y = (int)screenposy;
+            }
+            else
+            {
+                return new Point(-99, -99);
+            }
+            return twoDPoint;
+
+            /*
             float w = (mtx.m41 * position.x) + (mtx.m42 * position.y) + (mtx.m43 * position.z) + mtx.m44;
 
             if (w > 0.001)
@@ -128,8 +155,9 @@ namespace PangyaEspBox
             {
                 return new Point(-99, -99);
             }
-
+            
             return twoDPoint;
+            */   
         }
 
         void ESP()
